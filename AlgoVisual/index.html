@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoVisual - Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        select, button, input {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .visualization-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .algorithm-info h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .complexity-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            margin: 20px 0;
+            min-height: 300px;
+        }
+
+        .array-bar {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            min-width: 40px;
+        }
+
+        .array-bar.comparing {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            transform: scale(1.1);
+        }
+
+        .array-bar.sorted {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .array-bar.pivot {
+            background: linear-gradient(45deg, #f39c12, #d68910);
+        }
+
+        .graph-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            position: relative;
+            width: 100%;
+            height: 400px;
+        }
+
+        .graph-node {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .graph-node.visited {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .graph-node.current {
+            background: linear-gradient(45deg, #f39c12, #d68910);
+            transform: scale(1.2);
+        }
+
+        .graph-edge {
+            position: absolute;
+            height: 2px;
+            background: #34495e;
+            transform-origin: left center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .graph-edge.active {
+            background: #e74c3c;
+            height: 3px;
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .array-container {
+                min-height: 200px;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 AlgoVisual</h1>
+            <p class="subtitle">Interactive Algorithm & Data Structure Visualizer</p>
+        </header>
+
+        <div class="controls">
+            <select id="algorithmSelect">
+                <option value="bubble">Bubble Sort</option>
+                <option value="merge">Merge Sort</option>
+                <option value="quick">Quick Sort</option>
+                <option value="bfs">BFS Graph Traversal</option>
+                <option value="dfs">DFS Graph Traversal</option>
+                <option value="dijkstra">Dijkstra's Algorithm</option>
+            </select>
+            
+            <input type="number" id="arraySize" placeholder="Array Size" min="5" max="50" value="20">
+            <input type="text" id="customArray" placeholder="Custom Array (e.g., 45,20,10,60,5,30)">
+            
+            <button id="generateBtn">Generate Random</button>
+            <button id="startBtn" class="start-btn">Start Visualization</button>
+            <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+
+        <div class="main-content">
+            <div class="visualization-area">
+                <div id="arrayContainer" class="array-container"></div>
+                <div id="graphContainer" class="graph-container" style="display: none;"></div>
+            </div>
+
+            <div class="info-panel">
+                <div class="algorithm-info">
+                    <h3 id="algorithmName">Bubble Sort</h3>
+                    <div class="complexity-info">
+                        <div><strong>Time Complexity:</strong> <span id="timeComplexity">O(n²)</span></div>
+                        <div><strong>Space Complexity:</strong> <span id="spaceComplexity">O(1)</span></div>
+                    </div>
+                    <div class="step-info">
+                        <h4>Current Step:</h4>
+                        <p id="currentStep">Ready to start visualization</p>
+                    </div>
+                </div>
+
+                <div class="speed-control">
+                    <label>Speed:</label>
+                    <input type="range" id="speedSlider" class="speed-slider" min="1" max="10" value="5">
+                    <span id="speedValue">5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="comparisons">0</div>
+                    <div>Comparisons</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="swaps">0</div>
+                    <div>Swaps</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="time">0</div>
+                    <div>Time (ms)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="steps">0</div>
+                    <div>Steps</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AlgoVisualizer {
+            constructor() {
+                this.array = [];
+                this.isRunning = false;
+                this.speed = 5;
+                this.comparisons = 0;
+                this.swaps = 0;
+                this.steps = 0;
+                this.startTime = 0;
+                this.graph = null;
+                this.graphNodes = {};
+                this.graphEdges = {};
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.generateRandomArray();
+                this.updateAlgorithmInfo();
+            }
+
+            initializeElements() {
+                this.algorithmSelect = document.getElementById('algorithmSelect');
+                this.arraySize = document.getElementById('arraySize');
+                this.customArray = document.getElementById('customArray');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedValue = document.getElementById('speedValue');
+                this.arrayContainer = document.getElementById('arrayContainer');
+                this.graphContainer = document.getElementById('graphContainer');
+                this.currentStep = document.getElementById('currentStep');
+                this.comparisonsEl = document.getElementById('comparisons');
+                this.swapsEl = document.getElementById('swaps');
+                this.timeEl = document.getElementById('time');
+                this.stepsEl = document.getElementById('steps');
+            }
+
+            setupEventListeners() {
+                this.generateBtn.addEventListener('click', () => this.generateRandomArray());
+                this.startBtn.addEventListener('click', () => this.startVisualization());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.algorithmSelect.addEventListener('change', () => this.updateAlgorithmInfo());
+                this.speedSlider.addEventListener('input', (e) => {
+                    this.speed = parseInt(e.target.value);
+                    this.speedValue.textContent = this.speed;
+                });
+                this.customArray.addEventListener('change', () => this.handleCustomArray());
+            }
+
+            generateRandomArray() {
+                const size = parseInt(this.arraySize.value) || 20;
+                this.array = Array.from({length: size}, () => Math.floor(Math.random() * 200) + 10);
+                this.renderArray();
+                this.reset();
+            }
+
+            handleCustomArray() {
+                const input = this.customArray.value.trim();
+                if (input) {
+                    try {
+                        this.array = input.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+                        if (this.array.length > 0) {
+                            this.arraySize.value = this.array.length;
+                            this.renderArray();
+                            this.reset();
+                        }
+                    } catch (e) {
+                        console.error('Invalid array format');
+                    }
+                }
+            }
+
+            renderArray() {
+                this.arrayContainer.innerHTML = '';
+                if (this.isGraphAlgorithm()) {
+                    this.arrayContainer.style.display = 'none';
+                    this.graphContainer.style.display = 'flex';
+                    this.renderGraph();
+                } else {
+                    this.arrayContainer.style.display = 'flex';
+                    this.graphContainer.style.display = 'none';
+                    const maxValue = Math.max(...this.array);
+                    this.array.forEach((value, index) => {
+                        const bar = document.createElement('div');
+                        bar.className = 'array-bar';
+                        bar.style.height = `${(value / maxValue) * 250}px`;
+                        bar.style.width = `${Math.max(40, 500 / this.array.length)}px`;
+                        bar.textContent = value;
+                        bar.id = `bar-${index}`;
+                        this.arrayContainer.appendChild(bar);
+                    });
+                }
+            }
+
+            isGraphAlgorithm() {
+                return ['bfs', 'dfs', 'dijkstra'].includes(this.algorithmSelect.value);
+            }
+
+            renderGraph() {
+                this.graphContainer.innerHTML = '';
+                this.graph = this.createSampleGraph();
+                this.graphNodes = {};
+                this.graphEdges = {};
+                
+                // Position nodes in a circle
+                const nodeKeys = Object.keys(this.graph);
+                const centerX = this.graphContainer.offsetWidth / 2;
+                const centerY = this.graphContainer.offsetHeight / 2;
+                const radius = Math.min(centerX, centerY) * 0.8;
+                
+                // Render nodes
+                nodeKeys.forEach((node, index) => {
+                    const angle = (index * 2 * Math.PI) / nodeKeys.length;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'graph-node';
+                    nodeEl.textContent = node;
+                    nodeEl.id = `node-${node}`;
+                    nodeEl.style.left = `${x}px`;
+                    nodeEl.style.top = `${y}px`;
+                    
+                    this.graphContainer.appendChild(nodeEl);
+                    this.graphNodes[node] = { element: nodeEl, x, y };
+                });
+                
+                // Render edges
+                nodeKeys.forEach(node => {
+                    this.graph[node].forEach(neighbor => {
+                        const edgeId = `edge-${node}-${neighbor}`;
+                        const reverseEdgeId = `edge-${neighbor}-${node}`;
+                        
+                        // Only create edge if it doesn't exist already
+                        if (!this.graphEdges[edgeId] && !this.graphEdges[reverseEdgeId]) {
+                            const startNode = this.graphNodes[node];
+                            const endNode = this.graphNodes[neighbor];
+                            
+                            const edge = document.createElement('div');
+                            edge.className = 'graph-edge';
+                            edge.id = edgeId;
+                            
+                            const length = Math.sqrt(Math.pow(endNode.x - startNode.x, 2) + Math.pow(endNode.y - startNode.y, 2));
+                            const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x) * 180 / Math.PI;
+                            
+                            edge.style.width = `${length}px`;
+                            edge.style.left = `${startNode.x}px`;
+                            edge.style.top = `${startNode.y}px`;
+                            edge.style.transform = `rotate(${angle}deg)`;
+                            
+                            this.graphContainer.appendChild(edge);
+                            this.graphEdges[edgeId] = edge;
+                        }
+                    });
+                });
+            }
+
+            createSampleGraph() {
+                return {
+                    'A': ['B', 'C'],
+                    'B': ['A', 'D', 'E'],
+                    'C': ['A', 'F'],
+                    'D': ['B'],
+                    'E': ['B', 'F'],
+                    'F': ['C', 'E']
+                };
+            }
+
+            updateAlgorithmInfo() {
+                const algorithm = this.algorithmSelect.value;
+                const info = {
+                    'bubble': {
+                        name: 'Bubble Sort',
+                        time: 'O(n²)',
+                        space: 'O(1)',
+                        description: 'Compares adjacent elements and swaps them if they are in wrong order'
+                    },
+                    'merge': {
+                        name: 'Merge Sort',
+                        time: 'O(n log n)',
+                        space: 'O(n)',
+                        description: 'Divides array into halves, sorts them and merges back'
+                    },
+                    'quick': {
+                        name: 'Quick Sort',
+                        time: 'O(n log n)',
+                        space: 'O(log n)',
+                        description: 'Picks pivot element and partitions array around it'
+                    },
+                    'bfs': {
+                        name: 'Breadth-First Search',
+                        time: 'O(V + E)',
+                        space: 'O(V)',
+                        description: 'Explores graph level by level using a queue'
+                    },
+                    'dfs': {
+                        name: 'Depth-First Search',
+                        time: 'O(V + E)',
+                        space: 'O(V)',
+                        description: 'Explores graph by going as deep as possible before backtracking'
+                    },
+                    'dijkstra': {
+                        name: "Dijkstra's Algorithm",
+                        time: 'O((V + E) log V)',
+                        space: 'O(V)',
+                        description: 'Finds shortest path from source to all other vertices'
+                    }
+                };
+                
+                document.getElementById('algorithmName').textContent = info[algorithm].name;
+                document.getElementById('timeComplexity').textContent = info[algorithm].time;
+                document.getElementById('spaceComplexity').textContent = info[algorithm].space;
+                
+                this.renderArray();
+            }
+
+            async startVisualization() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.startTime = Date.now();
+                this.startBtn.disabled = true;
+                this.generateBtn.disabled = true;
+                this.resetBtn.disabled = true;
+                
+                const algorithm = this.algorithmSelect.value;
+                
+                try {
+                    switch (algorithm) {
+                        case 'bubble':
+                            await this.bubbleSort();
+                            break;
+                        case 'merge':
+                            await this.mergeSort(0, this.array.length - 1);
+                            break;
+                        case 'quick':
+                            await this.quickSort(0, this.array.length - 1);
+                            break;
+                        case 'bfs':
+                            await this.bfs('A');
+                            break;
+                        case 'dfs':
+                            await this.dfs('A');
+                            break;
+                        case 'dijkstra':
+                            await this.dijkstra('A');
+                            break;
+                    }
+                    
+                    this.currentStep.textContent = 'Algorithm completed!';
+                    this.markAllSorted();
+                } catch (error) {
+                    console.error('Visualization error:', error);
+                    this.currentStep.textContent = 'Error during visualization';
+                } finally {
+                    this.isRunning = false;
+                    this.startBtn.disabled = false;
+                    this.generateBtn.disabled = false;
+                    this.resetBtn.disabled = false;
+                    this.timeEl.textContent = Date.now() - this.startTime;
+                }
+            }
+
+            async bubbleSort() {
+                const n = this.array.length;
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        if (!this.isRunning) break;
+                        
+                        this.updateStep(`Comparing elements at positions ${j} and ${j + 1}: ${this.array[j]} vs ${this.array[j + 1]}`);
+                        this.highlightBars([j, j + 1], 'comparing');
+                        
+                        this.comparisons++;
+                        this.updateStats();
+                        
+                        await this.delay();
+                        
+                        if (this.array[j] > this.array[j + 1]) {
+                            [this.array[j], this.array[j + 1]] = [this.array[j + 1], this.array[j]];
+                            this.swaps++;
+                            this.updateStats();
+                            this.updateBars([j, j + 1]);
+                        }
+                        
+                        this.steps++;
+                        this.updateStats();
+                        this.clearHighlights();
+                    }
+                    this.markSorted(n - 1 - i);
+                }
+            }
+
+            async mergeSort(left, right) {
+                if (left < right && this.isRunning) {
+                    const mid = Math.floor((left + right) / 2);
+                    
+                    this.updateStep(`Dividing array: [${left}, ${mid}] and [${mid + 1}, ${right}]`);
+                    await this.delay();
+                    
+                    await this.mergeSort(left, mid);
+                    await this.mergeSort(mid + 1, right);
+                    await this.merge(left, mid, right);
+                }
+            }
+
+            async merge(left, mid, right) {
+                const leftArray = this.array.slice(left, mid + 1);
+                const rightArray = this.array.slice(mid + 1, right + 1);
+                
+                let i = 0, j = 0, k = left;
+                
+                while (i < leftArray.length && j < rightArray.length && this.isRunning) {
+                    this.updateStep(`Merging: comparing ${leftArray[i]} and ${rightArray[j]}`);
+                    this.highlightBars([k], 'comparing');
+                    
+                    this.comparisons++;
+                    this.updateStats();
+                    await this.delay();
+                    
+                    if (leftArray[i] <= rightArray[j]) {
+                        this.array[k] = leftArray[i];
+                        i++;
+                    } else {
+                        this.array[k] = rightArray[j];
+                        j++;
+                    }
+                    
+                    this.updateBars([k]);
+                    k++;
+                    this.steps++;
+                    this.updateStats();
+                    this.clearHighlights();
+                }
+                
+                while (i < leftArray.length && this.isRunning) {
+                    this.array[k] = leftArray[i];
+                    this.updateBars([k]);
+                    i++;
+                    k++;
+                }
+                
+                while (j < rightArray.length && this.isRunning) {
+                    this.array[k] = rightArray[j];
+                    this.updateBars([k]);
+                    j++;
+                    k++;
+                }
+            }
+
+            async quickSort(low, high) {
+                if (low < high && this.isRunning) {
+                    const pi = await this.partition(low, high);
+                    await this.quickSort(low, pi - 1);
+                    await this.quickSort(pi + 1, high);
+                }
+            }
+
+            async partition(low, high) {
+                const pivot = this.array[high];
+                this.highlightBars([high], 'pivot');
+                this.updateStep(`Pivot selected: ${pivot} at position ${high}`);
+                
+                let i = low - 1;
+                
+                for (let j = low; j < high && this.isRunning; j++) {
+                    this.updateStep(`Comparing ${this.array[j]} with pivot ${pivot}`);
+                    this.highlightBars([j], 'comparing');
+                    
+                    this.comparisons++;
+                    this.updateStats();
+                    await this.delay();
+                    
+                    if (this.array[j] < pivot) {
+                        i++;
+                        [this.array[i], this.array[j]] = [this.array[j], this.array[i]];
+                        this.swaps++;
+                        this.updateStats();
+                        this.updateBars([i, j]);
+                    }
+                    
+                    this.steps++;
+                    this.updateStats();
+                    this.clearHighlights();
+                }
+                
+                [this.array[i + 1], this.array[high]] = [this.array[high], this.array[i + 1]];
+                this.swaps++;
+                this.updateStats();
+                this.updateBars([i + 1, high]);
+                
+                return i + 1;
+            }
+
+            async bfs(start) {
+                const visited = new Set();
+                const queue = [start];
+                visited.add(start);
+                
+                while (queue.length > 0 && this.isRunning) {
+                    const current = queue.shift();
+                    this.updateStep(`Visiting node: ${current}`);
+                    this.highlightGraphNode(current, 'current');
+                    
+                    this.steps++;
+                    this.updateStats();
+                    await this.delay();
+                    
+                    for (const neighbor of this.graph[current]) {
+                        if (!visited.has(neighbor)) {
+                            visited.add(neighbor);
+                            queue.push(neighbor);
+                            this.highlightGraphEdge(current, neighbor);
+                            await this.delay();
+                        }
+                    }
+                    
+                    this.highlightGraphNode(current, 'visited');
+                }
+            }
+
+            async dfs(start) {
+                const visited = new Set();
+                await this.dfsRecursive(start, visited);
+            }
+
+            async dfsRecursive(node, visited) {
+                if (!this.isRunning) return;
+                
+                visited.add(node);
+                this.updateStep(`Visiting node: ${node}`);
+                this.highlightGraphNode(node, 'current');
+                
+                this.steps++;
+                this.updateStats();
+                await this.delay();
+                
+                for (const neighbor of this.graph[node]) {
+                    if (!visited.has(neighbor)) {
+                        this.highlightGraphEdge(node, neighbor);
+                        await this.delay();
+                        await this.dfsRecursive(neighbor, visited);
+                    }
+                }
+                
+                this.highlightGraphNode(node, 'visited');
+            }
+
+            async dijkstra(start) {
+                const distances = {};
+                const visited = new Set();
+                const previous = {};
+                const nodes = Object.keys(this.graph);
+                
+                // Initialize distances
+                nodes.forEach(node => {
+                    distances[node] = node === start ? 0 : Infinity;
+                    previous[node] = null;
+                });
+                
+                while (visited.size < nodes.length && this.isRunning) {
+                    // Find unvisited node with minimum distance
+                    let current = null;
+                    let minDistance = Infinity;
+                    
+                    for (const node of nodes) {
+                        if (!visited.has(node)) {
+                            if (distances[node] < minDistance) {
+                                current = node;
+                                minDistance = distances[node];
+                            }
+                        }
+                    }
+                    
+                    if (current === null) break;
+                    
+                    visited.add(current);
+                    this.updateStep(`Processing node: ${current} (distance: ${distances[current]})`);
+                    this.highlightGraphNode(current, 'current');
+                    
+                    this.steps++;
+                    this.updateStats();
+                    await this.delay();
+                    
+                    // Update distances to neighbors
+                    for (const neighbor of this.graph[current]) {
+                        if (!visited.has(neighbor)) {
+                            const edgeId = `edge-${current}-${neighbor}`;
+                            const reverseEdgeId = `edge-${neighbor}-${current}`;
+                            const edge = this.graphEdges[edgeId] || this.graphEdges[reverseEdgeId];
+                            
+                            if (edge) {
+                                edge.classList.add('active');
+                            }
+                            
+                            const newDistance = distances[current] + 1; // Assuming weight 1 for all edges
+                            if (newDistance < distances[neighbor]) {
+                                distances[neighbor] = newDistance;
+                                previous[neighbor] = current;
+                            }
+                            
+                            await this.delay();
+                        }
+                    }
+                    
+                    this.highlightGraphNode(current, 'visited');
+                }
+            }
+
+            highlightGraphNode(node, state) {
+                const nodeElement = document.getElementById(`node-${node}`);
+                if (nodeElement) {
+                    nodeElement.className = 'graph-node';
+                    if (state) {
+                        nodeElement.classList.add(state);
+                    }
+                }
+            }
+
+            highlightGraphEdge(node1, node2) {
+                const edgeId = `edge-${node1}-${node2}`;
+                const reverseEdgeId = `edge-${node2}-${node1}`;
+                
+                const edge = this.graphEdges[edgeId] || this.graphEdges[reverseEdgeId];
+                if (edge) {
+                    edge.classList.add('active');
+                    
+                    // Remove highlight after delay
+                    setTimeout(() => {
+                        if (edge) edge.classList.remove('active');
+                    }, this.getDelayTime() * 2);
+                }
+            }
+
+            highlightBars(indices, className) {
+                indices.forEach(index => {
+                    const bar = document.getElementById(`bar-${index}`);
+                    if (bar) {
+                        bar.className = 'array-bar';
+                        bar.classList.add(className);
+                    }
+                });
+            }
+
+            clearHighlights() {
+                document.querySelectorAll('.array-bar').forEach(bar => {
+                    bar.className = 'array-bar';
+                });
+            }
+
+            updateBars(indices) {
+                const maxValue = Math.max(...this.array);
+                indices.forEach(index => {
+                    const bar = document.getElementById(`bar-${index}`);
+                    if (bar) {
+                        bar.style.height = `${(this.array[index] / maxValue) * 250}px`;
+                        bar.textContent = this.array[index];
+                    }
+                });
+            }
+
+            markSorted(index) {
+                const bar = document.getElementById(`bar-${index}`);
+                if (bar) {
+                    bar.classList.add('sorted');
+                }
+            }
+
+            markAllSorted() {
+                if (this.isGraphAlgorithm()) return;
+                
+                this.array.forEach((_, index) => {
+                    this.markSorted(index);
+                });
+            }
+
+            updateStep(text) {
+                this.currentStep.textContent = text;
+            }
+
+            updateStats() {
+                this.comparisonsEl.textContent = this.comparisons;
+                this.swapsEl.textContent = this.swaps;
+                this.stepsEl.textContent = this.steps;
+                this.timeEl.textContent = Date.now() - this.startTime;
+            }
+
+            reset() {
+                this.isRunning = false;
+                this.comparisons = 0;
+                this.swaps = 0;
+                this.steps = 0;
+                this.timeEl.textContent = '0';
+                this.updateStats();
+                this.currentStep.textContent = 'Ready to start visualization';
+                
+                // Clear highlights
+                if (this.isGraphAlgorithm()) {
+                    document.querySelectorAll('.graph-node').forEach(node => {
+                        node.className = 'graph-node';
+                    });
+                    document.querySelectorAll('.graph-edge').forEach(edge => {
+                        edge.classList.remove('active');
+                    });
+                } else {
+                    this.clearHighlights();
+                    document.querySelectorAll('.array-bar').forEach(bar => {
+                        bar.className = 'array-bar';
+                    });
+                }
+            }
+
+            delay() {
+                return new Promise(resolve => setTimeout(resolve, this.getDelayTime()));
+            }
+
+            getDelayTime() {
+                return 1000 / this.speed;
+            }
+        }
+
+        // Initialize the visualizer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AlgoVisualizer();
+        });
+    </script>
+</body>
+</html>
